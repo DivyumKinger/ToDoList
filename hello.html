@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dark Theme Todo List</title>
+    <style>
+        :root {
+            --bg-color: #1e1e1e;
+            --card-bg-color: #2d2d2d;
+            --text-color: #e0e0e0;
+            --primary-color: #bb86fc;
+            --secondary-color: #03dac6;
+            --delete-color: #cf6679;
+        }
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+        }
+        .input-container {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        #todo-input {
+            flex-grow: 1;
+            padding: 10px;
+            font-size: 16px;
+            background-color: var(--card-bg-color);
+            border: 1px solid var(--primary-color);
+            border-radius: 4px 0 0 4px;
+            color: var(--text-color);
+        }
+        #add-button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: var(--primary-color);
+            color: var(--bg-color);
+            border: none;
+            border-radius: 0 4px 4px 0;
+            cursor: pointer;
+        }
+        #todo-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        #todo-list li {
+            background-color: var(--card-bg-color);
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .remove-btn {
+            background-color: var(--delete-color);
+            color: var(--bg-color);
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .todo-text {
+            flex-grow: 1;
+            margin-right: 10px;
+        }
+        .completed {
+            text-decoration: line-through;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <h1>Dark Theme Todo List</h1>
+    <div class="input-container">
+        <input type="text" id="todo-input" placeholder="Enter a new todo">
+        <button id="add-button" onclick="addTodo()">Add Todo</button>
+    </div>
+    <ul id="todo-list"></ul>
+
+    <script>
+        function addTodo() {
+            const input = document.getElementById('todo-input');
+            const todoText = input.value.trim();
+            if (todoText) {
+                const todoList = document.getElementById('todo-list');
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <span class="todo-text">${todoText}</span>
+                    <button class="remove-btn" onclick="removeTodo(this)">Remove</button>
+                `;
+                li.addEventListener('click', toggleComplete);
+                todoList.appendChild(li);
+                input.value = '';
+                saveTodos();
+            }
+        }
+
+        function removeTodo(button) {
+            button.parentElement.remove();
+            saveTodos();
+        }
+
+        function toggleComplete(event) {
+            if (event.target.tagName === 'LI' || event.target.classList.contains('todo-text')) {
+                event.currentTarget.querySelector('.todo-text').classList.toggle('completed');
+                saveTodos();
+            }
+        }
+
+        function saveTodos() {
+            const todos = Array.from(document.querySelectorAll('#todo-list li')).map(li => ({
+                text: li.querySelector('.todo-text').textContent,
+                completed: li.querySelector('.todo-text').classList.contains('completed')
+            }));
+            localStorage.setItem('todos', JSON.stringify(todos));
+        }
+
+        function loadTodos() {
+            const todos = JSON.parse(localStorage.getItem('todos')) || [];
+            const todoList = document.getElementById('todo-list');
+            todos.forEach(todo => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <span class="todo-text ${todo.completed ? 'completed' : ''}">${todo.text}</span>
+                    <button class="remove-btn" onclick="removeTodo(this)">Remove</button>
+                `;
+                li.addEventListener('click', toggleComplete);
+                todoList.appendChild(li);
+            });
+        }
+
+        document.getElementById('todo-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addTodo();
+            }
+        });
+
+        window.onload = loadTodos;
+    </script>
+</body>
+</html>
